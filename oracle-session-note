@@ -1,1 +1,2 @@
 alter session set nls_language = 'EGNLISH';  <-- with this code, you can chage your working language on Oracle while session life-long
+after that you can use your native language f.e 'TURKISH', like alter session set nls_language = 'TURKISH';

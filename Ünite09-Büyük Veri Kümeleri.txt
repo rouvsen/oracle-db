@@ -1,0 +1,142 @@
+--------------------------------------------
+--DEFAULT Değerini Kullanmak
+--------------------------------------------
+
+create table default_ornek
+(
+    ad varchar2(20), 
+    soyad varchar2(30) default '--', 
+    tarih date
+);
+
+insert into default_ornek(ad, soyad, tarih) 
+values('Ali', default, sysdate);
+
+select * from default_ornek;
+
+--------------------------------------------
+--Başka Tablodan Veri Kopyalamak
+--------------------------------------------
+
+create table personel_bordro
+(
+  personel_id number,
+  maas number,
+  prim number
+);
+
+insert into personel_bordro(personel_id, maas, prim)
+select personel_id, maas, prim 
+from personel
+
+--------------------------------------------
+--ŞARTSIZ INSERT ALL
+--------------------------------------------
+
+insert all
+  into personel_sicil values (personel_id, ad, soyad)
+  into personel_maas values  (personel_id, maas, prim)
+select ad, soyad, personel_id, maas, prim
+from personel
+where unvan = ‘UZMAN’;
+
+--------------------------------------------
+--ŞARTLI INSERT ALL
+--------------------------------------------
+
+insert all
+  when unvan = 'UZMAN' then
+    into personel_uzman values(personel_id, ad, soyad, maas, unvan)
+  when unvan in ('MÜDÜR', 'GRUP MÜDÜRÜ') then
+    into personel_yonetici values(personel_id, ad, soyad, maas, unvan)
+select ad, soyad, personel_id, maas, prim, unvan
+from personel;
+
+--------------------------------------------
+--ŞARTLI INSERT FIRST
+--------------------------------------------
+
+insert first
+    when maas <= 3000 then
+        into dusuk_maas  values (personel_id, ad, soyad, maas)
+    when maas between 3000 and 6000 then
+        into orta_maas   values (personel_id, ad, soyad, maas)
+    else
+        into yuksek_maas values (personel_id, ad, soyad, maas)
+select personel_id, ad, soyad, maas
+from personel
+
+--------------------------------------------
+
+insert first
+  when unvan = 'UZMAN' then
+    into personel_uzman values (personel_id, ad, soyad, maas, unvan)
+  when unvan in ('MÜDÜR', 'GRUP MÜDÜRÜ') then
+    into personel_yonetici values(personel_id, ad, soyad, maas, unvan)
+  when unvan in ('UZMAN', 'MÜHENDİS') then
+    into personel_diger values(personel_id, ad, soyad, maas, unvan)
+select ad, soyad, personel_id, maas, prim, unvan
+from personel;
+
+--------------------------------------------
+--DİKEY INSERT
+--------------------------------------------
+
+create table bilgiler
+(
+    personel_id number,
+    kod integer,
+    aciklama varchar2(100),
+    deger varchar2(100)
+);
+
+insert all
+  into bilgiler values(personel_id, 1, 'Adı-Soyadı', ad||' '||Soyad)
+  into bilgiler values(personel_id, 2, 'Unvan', unvan)
+  into bilgiler values(personel_id, 3, 'Maaş', to_char(maas))
+  into bilgiler values(personel_id, 4, 'Semt', semt)
+  into bilgiler values(personel_id, 5, 'Giriş Tairihi', 	to_char(giris_tarihi,'dd.mm.yyyy’))
+select * from personel;
+
+--------------------------------------------
+--MERGE
+--------------------------------------------
+
+--Sadece uzman, mühendislerin olduğu bir personel tablosu oluşturuluyor
+create table prs1 as 
+select personel_id, ad, soyad, maas, unvan 
+from personel where unvan in ('MÜHENDİS', 'UZMAN');
+
+--Sadece müdür, uzman, mühendislerin olduğu bir personel tablosu oluşturuluyor
+create table prs2 as 
+select personel_id, ad, soyad, maas, unvan 
+from personel where unvan in ('MÜHENDİS', 'UZMAN', 'MÜDÜR');
+
+--Müdür harici personelin maaşına %5 zam yapılıyor
+update prs2 set maas = maas*1.05 where unvan != 'MÜDÜR';
+
+--2 tablo prs1 üzerinde merge ediliyor
+merge into prs1 p1
+using prs2 p2
+  on (p1.personel_id = p2.personel_id)
+when matched then 
+  update set p1.maas = p2.maas
+  delete where maas > 5000
+when not matched then
+  insert (personel_id, ad, soyad, maas, unvan)
+  values (p2.personel_id, p2.ad, p2.soyad, p2.maas, p2.unvan);
+
+
+-----------------------------------------------------
+--ALIŞTIRMALARIN CEVAPLARI
+-----------------------------------------------------
+
+--------------------------------------------
+--ŞARTLI INSERT ALL
+--------------------------------------------
+
+insert into personel_yonetici
+select personel_id, ad, soyad, maas, unvan
+from personel
+where unvan in ('MÜDÜR', 'GRUP MÜDÜRÜ');
+

@@ -1,0 +1,156 @@
+--------------------------------------------
+--WHERE ifadesinin Kullanımı
+--------------------------------------------
+
+SELECT * FROM mudurluk 
+WHERE il_adi = 'ANKARA'
+
+--------------------------------------------
+--Karşılaştırma Operatörleri
+--------------------------------------------
+
+SELECT ad, soyad, maas FROM personel
+WHERE maas >= 3200
+
+--------------------------------------------
+--BETWEEN Operatörü
+--------------------------------------------
+
+SELECT ad, soyad, maas FROM personel
+WHERE maas between 1000 and 2000
+
+--------------------------------------------
+--IN Operatörü
+--------------------------------------------
+
+SELECT personel_id, ad, soyad, maas 
+FROM personel 
+WHERE personel_id in (5000, 5008, 5013)
+
+--------------------------------------------
+--LIKE Operatörü
+--------------------------------------------
+
+select ad, soyad, maas 
+from personel 
+where ad like 'A%' 
+
+select ad, soyad, maas 
+from personel 
+where ad like '_K%’
+
+Adının sondan 2. harfi U olan personelleri bulan SQL???
+
+select ad, soyad, maas 
+from personel 
+where ad like '%U_' 
+
+Soyadının içinde M harfi geçen personelleri bulan SQL???
+
+select ad, soyad, maas 
+from personel 
+where soyad like '%M%'
+
+--------------------------------------------
+--IS NULL Operatörü
+--------------------------------------------
+
+select ad, soyad, semt from personel 
+where semt is null
+
+--------------------------------------------
+--AND Operatörü
+--------------------------------------------
+
+select ad, soyad, maas, unvan 
+from personel 
+where unvan = 'MÜHENDİS' 
+      and maas > 2500
+
+--------------------------------------------
+--OR Operatörü
+--------------------------------------------
+
+select ad, soyad, maas, unvan
+from personel 
+where unvan = 'MÜHENDİS' 
+      or maas > 2500
+
+--------------------------------------------
+--NOT Operatörü
+--------------------------------------------
+
+select ad, soyad, maas, unvan
+from personel 
+where unvan not in ('MÜHENDİS', 'UZMAN')
+
+--------------------------------------------
+
+select ad, soyad, maas, unvan
+from personel 
+where ad not like 'A%'
+
+--------------------------------------------
+--Operatör Üstünlük Sırası
+--------------------------------------------
+
+select ad, soyad, maas, unvan
+from personel 
+where (unvan = 'MÜHENDİS'
+      or 
+      unvan = 'UZMAN‘)
+      and 
+      maas > 2000
+
+--------------------------------------------
+--Order By Operatörü
+--------------------------------------------
+
+select ad, soyad, maas, unvan 
+from personel 
+order by maas
+
+select * 
+from personel 
+order by 5
+
+select ad, soyad, maas, unvan 
+from personel 
+order by unvan, maas desc
+
+select * 
+from personel 
+order by konum_id nulls last
+
+select * 
+from personel 
+order by konum_id nulls first
+
+--------------------------------------------
+--Dışardan Değişken Atama
+--------------------------------------------
+
+select personel_id, ad, soyad, maas, unvan 
+from personel 
+where personel_id = &id
+
+--------------------------------------------
+
+select personel_id, ad, soyad, 
+       maas, &kolon_ismi 
+from personel 
+where &sart
+order by &sira_sutun
+
+-----------------------------------------------------
+--ALIŞTIRMALARIN CEVAPLARI
+-----------------------------------------------------
+
+--------------------------------------------
+--Operatör Üstünlük Sırası
+--------------------------------------------
+
+select ad, soyad, maas, unvan
+from personel 
+where unvan not in ('MÜHENDİS', 'UZMAN')
+      and (ad like 'A%' or ad like '%A')

@@ -1,0 +1,119 @@
+--------------------------------------------
+--AVG ve SUM
+--------------------------------------------
+
+select round(avg(maas),2) maas_ortalaması, 
+       sum(maas) toplam_maas 
+from personel
+
+--------------------------------------------
+--MIN ve MAX
+--------------------------------------------
+
+select min(maas) en_dusuk_maas, 
+       max(maas) en_yuksek_maas,
+       min(giris_tarihi) ilk_ise_baslama,     
+       max(giris_tarihi) son_ise_baslama 
+from personel 
+where unvan = 'MÜHENDİS'
+
+--------------------------------------------
+--COUNT
+--------------------------------------------
+
+select count(*) kayit_sayisi, 
+       count(prim) prim_alani_null_olmayan
+from personel 
+where unvan = 'UZMAN'
+
+--------------------------------------------
+--DISTINCT
+--------------------------------------------
+
+select distinct unvan 
+from personel 
+order by unvan;
+
+--------------------------------------------
+
+select count(*) tum_kayit_sayisi, 
+       count(semt) semt_null_olmayan, 
+       count(distinct semt) kac_farkli_semt
+from personel;
+
+--------------------------------------------
+--GROUP BY Kullanımı
+--------------------------------------------
+
+select semt 
+from personel 
+group by semt 
+order by 1
+
+--------------------------------------------
+--GROUP BY – Bir Kolon
+--------------------------------------------
+
+select unvan, 
+       count(*) personel_sayisi,
+       round(avg(maas),2) maas_ortalamasi, 
+       sum(maas) toplam_maas
+from personel
+group by unvan
+order by unvan;
+
+--------------------------------------------
+--GROUP BY – Birden Fazla Kolon
+--------------------------------------------
+
+select unvan, semt, 
+       count(*) personel_sayisi
+from personel
+group by unvan, semt
+order by unvan, semt;
+
+--------------------------------------------
+--HAVING İfadesi
+--------------------------------------------
+
+select unvan , 
+	 round(avg(maas),2) maas_ortalamasi 
+from personel
+group by unvan
+having avg(maas) > 3000
+order by unvan;
+
+-----------------------------------------------------
+--ALIŞTIRMALARIN CEVAPLARI
+-----------------------------------------------------
+
+--------------------------------------------
+--MIN - MAX - AVG
+--------------------------------------------
+
+select min(length(concat(ad,soyad))) enaz,
+       max(length(concat(ad,soyad))) encok, 
+       round(avg(length(concat(ad,soyad))),2) ortalama
+from personel;
+
+--------------------------------------------
+--HAVING
+--------------------------------------------
+
+select semt, count(*)
+from personel
+group by semt
+having count(*) > 5
+order by semt;
+
+--------------------------------------------
+--Grup Fonksiyonları - Mix
+--------------------------------------------
+
+select konum_id, 
+       count(*) personel_sayisi,
+       sum(maas) toplam_maas, 
+       round(avg(maas),2) ortalama_maas 
+from personel
+group by konum_id
+having count(*) > 10 

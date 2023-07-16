@@ -1,0 +1,77 @@
+Bu dokümanda, Oracle'ın kendi container sitesinden image yükleme işlemleri anlatılmaktadır.
+Aşağıdaki adımlar aynı zamanda videoda da anlatılmaktadır. Burada sadece özet bir bilgi bulunmaktadır.
+
+Web Sitesi: https://container-registry.oracle.com/
+
+--------------------------------------------------------------------------------------------------------
+Adım-1: Oracle üyelik
+
+	Öncelikle, eğer hesabınız yoksa Oracle'da yeni bir hesap açmalısınız.
+	Bu dokümanın başında verilen adrese gidin.
+	Sağ üst köşedeki "Sign In" butonuna yıklayarak üyelik işlemlerini tamamlayın.
+
+--------------------------------------------------------------------------------------------------------
+
+Adım-2: Oracle container web sitesine docker üzerinden login olma
+
+	Aşağıdaki komutu MacOs terminal yada Windows komut satırından çalıştırın
+	Ardından username ve password bilgilerini girerek login olun
+
+	$ docker login container-registry.oracle.com
+	Username: kullanici_ismi@mail.com
+	Password: user_password
+	"Login Succeeded"
+
+--------------------------------------------------------------------------------------------------------
+
+Adım-2: İmaj indirme ve container oluşturma
+
+	Aşağıdaki komutla sitede bulunan son versiyon (latest) çekilir. 
+	Fakat istenirse "latest" yerine sayfanın en altında bulunan versiyon numaraları yazılabilir. 
+	"oracle_registry" olarak yazılan, image ismi olacak, farklı bir isim verilebilir.
+	-p parametresi mutlaka verilmeli, yoksa dışardan erişilemez
+
+	Komut:
+	docker run -d --name oracle_registry -p 1521:1521 container-registry.oracle.com/database/enterprise:latest
+
+--------------------------------------------------------------------------------------------------------
+
+Adım-3: Şifre değiştirme
+
+	Container run olduktan sonra aşağıdaki komutla "sys" kullanıcısının şifresi değiştirilir. 
+	İlk Oracle açılma işlemi uzun sürecektir. Lütfen 10-15 dakika bekleyin. 
+	Çalışma durumu docker loglarından takip edilebilir
+
+	Komut:
+	docker exec oracle_registry ./setPassword.sh your_pass
+
+--------------------------------------------------------------------------------------------------------
+
+Adım-4: Oracle veri tabanına bağlanma
+
+	Seçtiğiniz herhangi bir uygulama ile bağlanmak için aşağıdaki bilgileri girmelisiniz
+
+	Aşağıdaki Pluggable seçeneği ile bağlanın:
+
+	---------------------------------------------------------
+	Pluggable Database Conncection:
+
+		Host: localhost
+		Service Name: ORCLPDB1
+		UserName: sys
+		Password: your_password
+		Role: SYSDBA
+		Port: 1521
+
+	---------------------------------------------------------
+	Aşağıdaki Container seçeneği DBA olanlar için geçerlidir. 
+	Eğitim kapsamında bu seçenekle bağlanmanıza gerek yoktur.
+
+	Container Database Conncection:
+
+		Host: localhost
+		SID: ORCLCDB
+		UserName: sys
+		Password: your_password
+		Role: SYSDBA
+		Port: 1521	

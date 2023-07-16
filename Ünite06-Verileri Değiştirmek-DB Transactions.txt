@@ -1,0 +1,104 @@
+--------------------------------------------
+--Bir Tabloya Kayıt Ekleme
+--------------------------------------------
+
+insert into konum(konum_id, konum_adi, il_kodu)
+values (10, 'Ankara-Yenimahalle', 6);
+
+--------------------------------------------
+
+insert into konum
+values (11, 'İstanbul-Pendik', 34);
+
+--------------------------------------------
+
+insert into ceza_bilgi
+values(5021, 'Yüz Kızartıcı Suç', NULL, NULL);
+
+--------------------------------------------
+
+insert into ceza_bilgi
+values(6761, 'Uzaklaştırma', sysdate, to_date(’31.12.2011’, ‘DD.MM.YYYY’));
+
+--------------------------------------------
+--Başka Bir Tablodan Satır Kopyalama
+--------------------------------------------
+
+insert into ceza_bilgi
+(
+	personel_id, ceza_aciklama, 
+	baslangic_tarihi, bitis_tarihi
+)
+select
+	personel_id, 'Eylem Yapmak', 
+	sysdate, sysdate+10 
+from personel 
+where unvan = 'UZMAN'
+
+--------------------------------------------
+
+insert into personel_izinleri(
+  personel_id, izin_turu, 
+  izin_bas_tarihi, izin_bit_tarihi)
+select 
+	personel_id, 11, 
+	'10.03.2020', '12.03.2020'
+from personel
+where unvan = 'MÜDÜR'
+
+--------------------------------------------
+--Tablodaki Verileri Güncellemek
+--------------------------------------------
+
+update personel 
+set maas = 2800 
+where personel_id = 5012
+
+--------------------------------------------
+
+update personel 
+set giris_tarihi = to_date('01.01.2012', 'DD.MM.YYYY') 
+where yonetici_id = 919
+
+--------------------------------------------
+
+update personel set 
+maas  = (select maas  from personel where personel_id = 5004),
+unvan = (select unvan from personel where personel_id = 5004)
+where personel_id = 5005
+
+--------------------------------------------
+
+update personel set 
+(maas, unvan)
+=
+(select maas, unvan from personel where personel_id = 5004)
+where personel_id = 5005
+
+--------------------------------------------
+--Tablodaki Verileri Silmek
+--------------------------------------------
+
+delete from mudurluk where mudurluk_kodu = 62
+
+--------------------------------------------
+
+delete from mudurluk_sube 
+where mudurluk_kodu in 
+(
+  select mudurluk_kodu from mudurluk 
+  where il_adi = ‘HATAY’
+)
+
+--------------------------------------------
+--FOR UPDATE
+--------------------------------------------
+
+select * from personel where unvan = 'TEKNİKER' for update;
+13 rows selected
+
+--Diğer kullanıcı ile
+update egitim.personel set maas = 4000 where personel_id = 5020;
+
+Commit;
+

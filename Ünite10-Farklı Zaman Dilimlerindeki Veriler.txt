@@ -1,0 +1,131 @@
+--------------------------------------------
+--TIME ZONES
+--------------------------------------------
+
+ALTER SESSION SET TIME_ZONE = '+03:00'
+
+ALTER SESSION SET TIME_ZONE = dbtimezone
+
+ALTER SESSION SET TIME_ZONE = local
+
+ALTER SESSION SET TIME_ZONE = 'Turkey'
+
+--------------------------------------------
+--ŞİMDİKİ ZAMAN
+--------------------------------------------
+
+SELECT CURRENT_DATE, CURRENT_TIMESTAMP, LOCALTIMESTAMP FROM DUAL;
+
+ALTER SESSION SET TIME_ZONE = '-3:00';
+
+SELECT DBTIMEZONE, SESSIONTIMEZONE FROM DUAL;
+
+--------------------------------------------
+--TIME_STAMP Karşılaştırma
+--------------------------------------------
+
+create table zaman_ornek 
+(
+  zaman1 timestamp with time zone,
+  zaman2 timestamp with local time zone,
+  zaman3 date
+);
+
+insert into zaman_ornek 
+values (current_date, current_timestamp + 2, sysdate);
+
+select * from zaman_ornek;
+
+--------------------------------------------
+--INTERVAL YEAR TO MONTH
+--------------------------------------------
+
+create table uyarici 
+(
+  uyarici_id number,  
+  uyarici_araligi interval year(3) to month
+);
+
+insert into uyarici values (1, interval '6' month);
+insert into uyarici values (2, interval '-3' month);
+insert into uyarici values (3, interval '100' year(3));
+insert into uyarici values (4, '50-10');
+insert into uyarici values (5, '-1-2');
+
+select trunc(sysdate) simdiki_zaman, 
+       uyarici_araligi, 
+       trunc(sysdate + uyarici_araligi) uyari_zamani 
+from uyarici;
+
+--------------------------------------------
+--INTERVAL DAY TO SECOND
+--------------------------------------------
+
+create table sure_asimi 
+( 
+  sure_id number, 
+  sure_araligi interval day(2) to second
+);
+
+insert into sure_asimi values (1, '90 00:00:00');
+insert into sure_asimi values (2, interval '6 03:30:16' day to second);
+
+select sysdate, sure_araligi, (sysdate + sure_araligi) sure_zamani
+from sure_asimi;
+
+--------------------------------------------
+--TO_YMINTERVAL
+--------------------------------------------
+
+select ad, giris_tarihi, 
+      (giris_tarihi + to_yminterval(‘02-03’)) int_tarih
+from personel 
+where giris_tarihi is not null
+      and unvan = 'MÜDÜR';
+
+--------------------------------------------
+--TO_DSINTERVAL
+--------------------------------------------
+
+select ad, 
+  to_char(giris_tarihi,'dd.mm.yy hh24:mi:ss') giris1, 
+  to_char((giris_tarihi + to_dsinterval('10 10:10:10')),'dd.mm.yy hh24:mi:ss') giris2
+from personel 
+where giris_tarihi is not null;
+
+--------------------------------------------
+--INTERVAL Veri Tipleri - Örnek
+--------------------------------------------
+
+create table interval_ornek
+(
+  sure interval year(3) to month
+);
+
+insert into interval_ornek values('10-02');
+
+select trunc(sysdate), sure, 
+       trunc(sysdate + sure) sonuc1,
+       trunc(sysdate + to_yminterval(‘10-02’)) sonuc2,
+       trunc(add_months(sysdate, 122)) sonuc3
+from interval_ornek;
+
+--------------------------------------------
+--EXTRACT
+--------------------------------------------
+
+select ad, soyad, giris_tarihi, 
+       extract (year from giris_tarihi) yil, 
+       extract (month from giris_tarihi) ay,
+       extract (day from giris_tarihi) gun
+from personel
+
+--------------------------------------------
+--TZ_OFFSET
+--------------------------------------------
+
+SELECT TZ_OFFSET('US/Eastern'),
+       TZ_OFFSET('Canada/Yukon'),
+       TZ_OFFSET('Europe/London')
+ FROM DUAL;
+

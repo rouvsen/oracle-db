@@ -1,0 +1,199 @@
+--------------------------------------------
+--VIEW Oluşturma
+--------------------------------------------
+
+create view vw_konum_bilgi as
+select ad, soyad, semt, konum_adi
+from personel pr, konum kn
+where kn.konum_id = pr.konum_id
+
+--------------------------------------------
+
+create view vw_yoneticiler as
+select yn.yonetici_id, ps.ad, ps.soyad, 
+       ps.unvan, pk.konum_adi, 
+       (ps.maas + nvl(ps.prim,0)) gelir 
+from yonetici yn, personel ps, konum pk
+where ps.personel_id = yn.personel_id
+      and ps.konum_id = pk.konum_id;
+
+--------------------------------------------
+--VIEW’ları Değiştirmek
+--------------------------------------------
+
+create or replace view vw_konum_bilgi as
+select ad || soyad adi_soyadi, semt, konum_adi, il_kodu
+from personel pr, konum kn
+where kn.konum_id = pr.konum_id
+
+--------------------------------------------
+--VIEW Üzerinde DML
+--------------------------------------------
+
+create view vw_uzman as
+select * from personel where unvan = 'UZMAN';
+
+select * from vw_uzman;
+
+update vw_uzman set konum_id = 5 where prim > 0;
+
+select * from vw_uzman;
+
+--------------------------------------------
+--VIEW Üzerinde DML – With Read Only
+--------------------------------------------
+
+create or replace view vw_uzman as
+select * from personel where unvan = 'UZMAN'
+with read only;
+
+update vw_uzman set konum_id = 5 where prim > 0;
+
+--------------------------------------------
+--VIEW Üzerinde DML – With Check Option
+--------------------------------------------
+
+create or replace view vw_uzman as
+select * from personel where unvan = 'UZMAN';
+
+update vw_uzman set unvan = 'ŞEF';
+15 rows updated.
+
+select * from vw_uzman;
+
+create or replace view vw_uzman as
+select * from personel where unvan = 'UZMAN'
+with check option;
+
+update vw_uzman set unvan = 'ŞEF';
+
+--------------------------------------------
+--SEQUENCE - Oluşturma
+--------------------------------------------
+
+create sequence sq_konum
+                increment by 1
+                start with 10
+                maxvalue 9999
+                nocache
+                nocycle;
+
+--------------------------------------------
+--SEQUENCE Kullanımı
+--------------------------------------------
+
+insert into konum(konum_id, konum_adi, il_kodu) 
+values(sq_konum.nextval, 'Mecidiyeköy', 34);
+
+insert into konum(konum_id, konum_adi , il_kodu) 
+values(sq_konum.nextval, 'Gölbaşı', 6);
+
+select * from konum order by konum_id;
+
+--------------------------------------------
+--SEQUENCE’ i Değiştirme
+--------------------------------------------
+
+ALTER SEQUENCE SEQ_KONUM
+               INCREMENT BY 11
+               MAXVALUE 10000
+               NOCACHE
+               NOCYCLE;
+--------------------------------------------
+--INDEX Oluşturma
+--------------------------------------------
+
+CREATE INDEX PERSONEL_NI1 ON PERSONEL(PERSONEL_ID);
+
+CREATE INDEX PI_NI1 ON PERSONEL_IZINLERI(PERSONEL_ID, IZIN_TURU)
+
+--------------------------------------------
+--Function Based Index Oluşturma
+--------------------------------------------
+
+CREATE INDEX PERSONEL_NI2 ON PERSONEL(UPPER(AD));
+
+--------------------------------------------
+--SYNONYM
+--------------------------------------------
+
+create synonym sube for mudurluk_sube;
+
+select * from sube;
+
+--Egitim2 kullanısıyla bağlanalım ve aynı select’i çalıştıralım
+select * from sube; !!!
+
+--------------------------------------------
+--SYNONYM - Public
+--------------------------------------------
+
+drop synonym sube;
+
+create public synonym sube for prm_mudurluk_sube;
+
+--Diğer kullanıcıyla bağlanalım ve aynı SQL’i çalıştıralım
+select * from sube;
+
+--------------------------------------------
+--DROP
+--------------------------------------------
+
+drop synonym mudurluk
+
+drop public synonym sube
+
+drop index personel_ni1
+
+drop table abone purge
+
+drop constraint personel_fk1
+
+--------------------------------------------
+--FLASHBACK TABLE
+--------------------------------------------
+
+create table flashback_ornek (ad varchar2(50))
+
+insert into flashback_ornek values('Funda');
+insert into flashback_ornek values(‘Selen');
+insert into flashback_ornek values('Tuncay');
+insert into flashback_ornek values('Ömür');
+
+commit;
+
+select * from flashback_ornek
+
+drop table flashback_ornek
+
+select * from flashback_ornek
+
+flashback table flashback_ornek to before drop;
+
+--------------------------------------------
+
+FLASHBACK TABLE PERSONEL TO TIMESTAMPTO_TIMESTAMP('2012-06-04 11:30:00', 'YYYY-MM-DD HH24:MI:SS');
+
+
+SELECT NAME, SCN, TIME, DATABASE_INCARNATION#, GUARANTEE_FLASHBACK_DATABASE,STORAGE_SIZE 
+FROM V$RESTORE_POINT
+
+
+FLASHBACK TABLE EMP TO SCN 123456
+
+--------------------------------------------
+--VERSIONS BETWEEN
+--------------------------------------------
+
+select * from mudurluk_sube where sube_kodu = 3;
+
+update mudurluk_sube set sube_adi = 'Giresun 6. Şube' 
+where sube_kodu = 3;
+
+commit;
+
+select versions_starttime, versions_endtime, sube_adi 
+from mudurluk_sube
+     versions between scn minvalue and maxvalue
+where sube_kodu = 3;
+

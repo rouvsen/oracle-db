@@ -1,0 +1,85 @@
+Bu dokümanda, hub.docker.com sitesinden image yükleme işlemleri anlatılmaktadır.
+Aşağıdaki adımlar aynı zamanda videoda da anlatılmaktadır. Burada sadece özet bir bilgi bulunmaktadır
+
+Web sitesi: hub.docker.com
+
+
+-------------------------------------------------------------------------------------------
+
+Adım-1: Docker Hub hesabı açma
+
+	hub.docker.com ==> web sayfasını açın
+	Signup ile yeni üyelik oluşturun
+	Plan seçme sayfasına gidin ve free olanı seçin
+	Üyelik işlemlerini tamamlayın
+	E-mail adresini onaylın
+
+-------------------------------------------------------------------------------------------
+
+Adım-2: Docker çalıştırma ve image indirme
+
+	hub.docker.com ==> web sayfasını açın
+	Serch box dan "Oracle database" ifadesini arayın
+	"Oracle Database Ent edition - 12c" yazan image'i seçin
+	İndirebilmek için lisans sözleşmesini kabul edin
+	Gelen sayfada kopyalanacak link mevcut, onu kopyalayın
+	"Mac Terminal" yada "Windows komut satırı" açın
+	Login olun
+		docker login ==> enter
+		username ==> enter
+		password ==> enter
+	dcoker_hub sayfasından kopyalanan linki yapıştır:
+		docker pull store/oracle/database-enterprise:12.2.0.1
+	Bu noktada "-slim" ifadesi eklenerek daha küçük dosya ve açılış zamanı olan oracle kurabilir
+
+-------------------------------------------------------------------------------------------
+
+Adım-3: Start Oracle image
+
+	docker images => yüklü olan image'ler listelenir
+	docker ps=> çalışan tüm iamge'leri gösterir
+	İndirilen oracle image'in çalıştırılması: 
+		docker run -d -p 1521:1521 --name oracle_docker store/oracle/database-enterprise:12.2.0.1
+	Yukarıda kurulan ve çalıştırılan image'in daha sonradan tekrar çalıştırma komutu
+		docker start oracle_docker=>enter
+	
+-------------------------------------------------------------------------------------------
+
+Adım-4: Oracle veri tabanına bağlan
+	
+	Seçtiğiniz herhangi bir uygulama ile bağlanmak için aşağıdaki bilgileri girmelisiniz
+
+	Aşağıdaki Pluggable seçeneği ile bağlanın:
+	
+	---------------------------------------------------------
+	Pluggable Database Conncection:
+
+		Username: SYS
+		Role: SYSDBA
+		Password: Oradoc_db1
+		Host: localhost
+		Service Name: ORCLPDB1.localdomain
+
+	---------------------------------------------------------
+
+	Aşağıdaki Container seçeneği DBA olanlar için geçerlidir. 
+	Eğitim kapsamında bu seçenekle bağlanmanıza gerek yoktur.
+	
+	Container Database Connection:
+
+		Username: SYS
+		Role: SYSDBA
+		Password: Oradoc_db1
+		Host: localhost
+		SID: ORCLCDB
+
+-------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------
+
+Ek bilgiler:
+
+Windows Linux Kernel Kurulum (WSL2):
+https://docs.microsoft.com/tr-tr/windows/wsl/install-manual#step-4---download-the-linux-kernel-update-package
+
+Docker komutları dokümanı:
+https://docs.docker.com/engine/reference/commandline/docker/

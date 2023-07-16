@@ -1,0 +1,291 @@
+--------------------------------------------
+--Eşiti Olan Birleştirme (Inner Join)
+--------------------------------------------
+
+select pr.ad, pr.soyad, pr.konum_id, kn.konum_adi 
+from personel pr, konum kn
+where pr.konum_id = kn.konum_id
+
+--------------------------------------------
+
+select pr.ad, pr.soyad, pr.konum_id, kn.konum_adi 
+from personel pr inner join konum kn 
+     on pr.konum_id = kn.konum_id
+
+--------------------------------------------
+--Dış Birleştirme (Outer Join)
+--------------------------------------------
+
+select ad, soyad, konum_adi, kn.konum_id
+from personel pr, konum kn
+where pr.konum_id = kn.konum_id(+)
+order by konum_adi nulls first
+
+--------------------------------------------
+
+select ad, soyad, konum_adi, kn.konum_id
+from personel pr left outer join konum kn 
+     on pr.konum_id = kn.konum_id
+order by konum_adi nulls first
+
+--------------------------------------------
+--Eşiti Olmayan Birleştirme
+--------------------------------------------
+
+select pr.ad, pr.soyad, pr.maas, uc.derece, uc.aciklama 
+from personel pr, ucret_duzey uc
+where pr.maas between uc.maas_alt_limit and uc.maas_ust_limit
+order by 1,2
+
+--------------------------------------------
+--Kendine (İç) Birleştirme
+--------------------------------------------
+
+select pr.ad, pr.soyad, 
+	 pry.ad || ' ' ||pry.soyad yönetici 
+from personel pr, yonetici yn, personel pry
+where pr.yonetici_id = yn.yonetici_id
+      and pry.personel_id = yn.personel_id
+order by 3
+
+--------------------------------------------
+--Kartezyen Çarpım
+--------------------------------------------
+
+select ad, soyad, pr.konum_id, kn.konum_adi 
+from personel pr, konum kn
+--where kn.konum_id = pr.konum_id
+order by 1,2
+
+--------------------------------------------
+--UNION Operatörü
+--------------------------------------------
+
+select ad, soyad, maas, unvan from personel
+Where maas between 1200 and 2500
+      and konum_id = 1
+union
+select ad, soyad, maas, unvan from personel
+Where maas between 1800 and 5000
+      and konum_id = 1
+
+--------------------------------------------
+--UNION ALL Operatörü
+--------------------------------------------
+
+select ad, soyad, maas, unvan from personel
+Where maas between 1200 and 2500
+      and konum_id = 1
+union all
+select ad, soyad, maas, unvan from personel
+Where maas between 1800 and 5000
+      and konum_id = 1
+order by 1
+
+--------------------------------------------
+--INTERSECT Operatörü
+--------------------------------------------
+
+select ad, soyad, maas, unvan from personel
+Where maas between 1200 and 2500
+      and konum_id = 1
+intersect
+select ad, soyad, maas, unvan from personel
+Where maas between 1800 and 5000
+      and konum_id = 1
+
+--------------------------------------------
+--MINUS Operatörü
+--------------------------------------------
+
+select ad, soyad, maas, unvan from personel
+Where maas between 1800 and 5000
+      and konum_id = 1
+minus
+select ad, soyad, maas, unvan from personel
+Where maas between 1200 and 2500
+      and konum_id = 1
+
+
+--------------------------------------------
+
+select personel_id from personel
+minus
+select personel_id from ceza_bilgi
+order by 1
+
+--------------------------------------------
+
+select personel_id from personel
+minus
+select personel_id from personel_izinleri
+order by 1
+
+--------------------------------------------
+--Tek Satır Alt Sorgular
+--------------------------------------------
+
+select ad, soyad, maas, unvan 
+from personel
+where unvan = 
+		(select unvan from personel where personel_id = 5025)
+
+--------------------------------------------
+
+select ad, soyad, maas, unvan 
+from personel
+where maas > 
+		(select maas from personel where personel_id = 5007)
+
+--------------------------------------------
+
+select ad, soyad, maas, unvan 
+from personel
+where maas = (select min(maas) from personel)
+
+--------------------------------------------
+--Tek Satır Alt Sorgular - Having
+--------------------------------------------
+
+select 
+   (select konum_adi from konum kn where kn.konum_id=ps.konum_id) konm, 
+   count(*) pers_sayisi  
+from personel
+group by konum_id
+having count(*) > (select count(*) from personel where konum_id = 3)
+
+--------------------------------------------
+--IN Operatörü
+--------------------------------------------
+
+select * from personel
+where personel_id in 
+	   (select personel_id from yonetici where seviye=1)
+
+--------------------------------------------
+--ANY Operatörü
+--------------------------------------------
+
+select ad, maas from personel
+where maas > any (3000, 4000, 5000)
+order by 2
+
+--------------------------------------------
+
+select ad, maas from personel
+where maas > 3000 or maas > 4000 or maas > 5000
+
+--------------------------------------------
+
+select ad, soyad, unvan, maas from personel
+where maas < any (select maas from personel where unvan = 'UZMAN')
+
+--------------------------------------------
+--ALL Operatörü
+--------------------------------------------
+
+select ad, maas from personel
+where maas > all (3000, 4000, 5000)
+order by 2
+
+--------------------------------------------
+
+select ad, maas from personel
+where maas > 3000 and maas > 4000 and maas > 5000
+
+--------------------------------------------
+
+select ad, soyad, unvan, izin_gunu from personel
+where izin_gunu > all 
+    (select izin_gunu from personel where unvan = 'GRUP MÜDÜRÜ')
+
+--------------------------------------------
+--EXISTS
+--------------------------------------------
+
+select * from personel pr
+where pr.yonetici_id in  
+  (
+     select yn.yonetici_id from yonetici yn 
+     where seviye = 1 
+  )
+
+select * from personel pr
+where exists 
+  (
+     select 1 from yonetici yn 
+     where seviye = 1 
+           and yn.yonetici_id = pr.yonetici_id
+  )
+
+--------------------------------------------
+--NOT EXISTS
+--------------------------------------------
+
+select * from personel pr
+where not exists 
+  (
+     select 1 from yonetici yn 
+     where seviye = 1 
+           and yn.yonetici_id = pr.yonetici_id
+  )
+
+--------------------------------------------
+--WITH
+--------------------------------------------
+
+with ort_maas as
+(
+  select yonetici_id, round(avg(maas),2) ortalama 
+  from personel
+  where yonetici_id is not null
+  group by yonetici_id
+)
+select ad, soyad, maas, pr.yonetici_id 
+from personel pr, ort_maas om
+where pr.yonetici_id = om.yonetici_id
+      and om.ortalama > 4000
+
+-----------------------------------------------------
+
+with dept_costs as 
+(   	select department_name, sum(salary) dept_total  	from employees emp, departments dep  	where emp.department_id = dep.department_id  	group by department_name),avg_costs as 
+(  	select sum(dept_total) / count(*) dept_avg   	from dept_costs )select * from dept_costs where dept_total > (select dept_avg from avg_costs)order by department_name;
+
+
+-----------------------------------------------------
+--ALIŞTIRMALARIN CEVAPLARI
+-----------------------------------------------------
+
+--------------------------------------------
+--Eşiti Olan Birleştirme (Inner Join)
+--------------------------------------------
+
+select md.mudurluk_kodu, md.mudurluk_adı, sb.sube_adı
+from mudurluk md, mudurluk_sube sb
+where md.mudurluk_kodu = sb.mudurluk_kodu;
+
+--------------------------------------------
+--ANY Operatörü
+--------------------------------------------
+
+select * from personel
+where maas < (select max(maas) from personel where unvan = 'UZMAN')
+
+select * from personel ps1
+where exists (select 1 from personel ps2 where unvan = 'UZMAN' and ps1.maas < ps2.maas)
+
+--------------------------------------------
+--WITH
+--------------------------------------------
+
+select ad, soyad, maas, pr.yonetici_id 
+from personel pr, 
+(  
+  select yonetici_id, round(avg(maas),2) ortmaas 
+  from personel
+  where yonetici_id is not null
+  group by yonetici_id
+) om
+where pr.yonetici_id = om.yonetici_id
+      and om.ortmaas > 4000

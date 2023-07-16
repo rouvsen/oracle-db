@@ -1,0 +1,206 @@
+--------------------------------------------
+--Bir Tablo Oluşturma
+--------------------------------------------
+
+CREATE TABLE EGITIM.CEZA_BILGI
+(
+  PERSONEL_ID       NUMBER,
+  CEZA_ACIKLAMA     VARCHAR2(100 BYTE),
+  BASLANGIC_TARIHI  DATE DEFAULT SYSDATE,
+  BITIS_TARIHI      DATE
+)
+
+--------------------------------------------
+
+CREATE TABLE PERSONEL_EGITIM
+(
+  PERSONEL_ID      NUMBER,
+  EGITIM_ADI       VARCHAR2(100),
+  BASLANGIC_TARIHI DATE,
+  BITIS_TARIHI     DATE,
+  EGITIM_TURU      INTEGER
+)
+
+--------------------------------------------
+--NOT NULL Constraint
+--------------------------------------------
+
+CREATE TABLE PERSONEL_EGITIM
+(
+  PERSONEL_ID      NUMBER        NOT NULL,      
+  EGITIM_ADI       VARCHAR2(100) NOT NULL,
+  BASLANGIC        DATE,
+  BITIS            DATE,
+  EGITIM_TURU      INTEGER
+)
+
+insert into personel_egitim
+(personel_id, egitim_adi, baslangic, bitis, egitim_turu)
+values (5555, null, sysdate+10, sysdate+15, 1)
+
+--------------------------------------------
+--UNIQUE Constraint
+--------------------------------------------
+
+CREATE TABLE PERSONEL_EGITIM
+(
+  PERSONEL_ID      NUMBER        NOT NULL,      
+  EGITIM_ADI       VARCHAR2(100) NOT NULL,
+  BASLANGIC        DATE,
+  BITIS            DATE,
+  EGITIM_TURU      INTEGER,
+  constraint pe_uc1 unique(personel_id, egitim_adi)
+);
+
+
+create unique index pe_uc1 on personel_eğitim (personel_id, egitim_adi)
+
+--------------------------------------------
+--PRIMARY KEY Constraint
+--------------------------------------------
+
+--Tablo create edilirken:
+create table izin_turleri
+(
+  izin_turu  integer primary key,
+  aciklama   varchar2(50 byte)
+);
+
+--Tablo varken:
+alter table izin_turleri
+   add constraint pk_izin_turu primary key (izin_turu);
+
+--------------------------------------------
+--FOREIGN KEY Constraint
+--------------------------------------------
+
+--Tablo varken:
+alter table personel add constraint fk_dept
+  foreign key (dept_id) references departman (dept_id)
+
+--------------------------------------------
+--CHECK Constraint
+--------------------------------------------
+
+create table personel
+(
+  sicil       number check(sicil > 0),
+  maas        number,
+  unvan       varchar2(50),
+  bas_tarih   date,
+  bit_tarih   date,
+  constraint ck_maas1 check(maas >= 1000),
+  constraint ck_maas2 check(maas between 1000 and 20000),
+  constraint ck_unvan check(unvan in (‘Uzman’, ‘Müdür’)),
+  check(bas_tarih < bit_tarih)
+);
+
+…
+alter table personel add constraint ck_maas1 check (maas > 1000)
+
+--------------------------------------------
+--Constraint Örnekleri
+--------------------------------------------
+
+--Bölge tablosu oluşturuluyor
+CREATE TABLE BOLGE
+(
+    BOLGE_KODU INTEGER PRIMARY KEY,
+    BOLGE_ADI  VARCHAR2(100 BYTE) NOT NULL 
+);
+
+--İl tablosu oluşturuluyor
+CREATE TABLE IL
+(
+    IL_KODU     INTEGER NOT NULL,
+    IL_ADI      VARCHAR2(50 BYTE) NOT NULL,
+    BOLGE_KODU  INTEGER,
+    CONSTRAINT FK_IL1 FOREIGN KEY (BOLGE_KODU) REFERENCES BOLGE(BOLGE_KODU)
+);
+
+--Bölgeler ekleniyor
+INSERT INTO BOLGE VALUES(1, 'İÇ ANADOLU');
+
+INSERT INTO BOLGE VALUES(1, 'MARMARA'); 
+
+INSERT INTO BOLGE VALUES(2, '');
+
+INSERT INTO BOLGE VALUES(2, 'MARMARA');
+
+--İller ekleniyor
+INSERT INTO IL VALUES(6, 'ANKARA', 1);
+
+INSERT INTO IL VALUES(61, 'TRABZON', 5); 
+
+--Bölge siliniyor
+DELETE FROM BOLGE WHERE BOLGE_KODU = 1;
+
+--------------------------------------------
+--Alt Sorgular ile Tablo Oluşturmak
+--------------------------------------------
+
+create table personel_uzman as 
+select personel_id, ad, 
+       soyad, maas,
+	     (maas+prim) hesaba_yatan
+from personel
+where unvan = ‘UZMAN’
+
+--------------------------------------------
+
+create table yonetici_yeni as 
+select yn.yonetici_id, ps.ad, ps.soyad, 
+	     ps.unvan, kn.konum_adi 
+from yonetici yn, personel ps, konum kn
+where ps.personel_id = yn.personel_id
+      and ps.konum_id = kn.konum_id
+
+--------------------------------------------
+--ALTER TABLE
+--------------------------------------------
+
+--Kolon ekleme
+alter table yonetici add (sicil_no number);
+
+
+--Kolon özelliği değiştirme
+alter table yonetici modify (unvan varchar2(150 byte));
+
+
+--Kolona default değer verme
+alter table yonetici modify (yonetici_id default 0);
+
+
+--Kolon drop etme
+alter table yonetici drop column sicil_no;
+
+--Kolon isimi değiştirme
+alter table yonetici rename column ad to adi;
+
+
+--Tabloyu read-only moda geçirme
+alter table yonetici read only;
+
+
+--Tablonun ismini değiştirme
+alter table yonetici rename to yoneticiler;
+
+
+--Tabloya partition ekleme
+alter table yonetici add partition part2 values (‘201005')
+
+--------------------------------------------
+--ALTER TABLE - Constraint
+--------------------------------------------
+
+alter table prm_iller add constraint fk_prm_iller 
+  foreign key (bolge_kodu) 
+  references prm_bolge(bolge_kodu) on delete cascade;
+
+--Disable
+alter table iller disable constraint fk_iller
+
+
+--Enable
+alter table iller enable constraint fk_iller
+

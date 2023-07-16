@@ -1,0 +1,70 @@
+--------------------------------------------
+--Tüm Kolonları Seçmek
+--------------------------------------------
+
+SELECT * 
+FROM mudurluk
+
+--------------------------------------------
+--İstenilen Kolonları Seçmek
+--------------------------------------------
+
+SELECT mudurluk_kodu, mudurluk_adi 
+FROM mudurluk
+
+--------------------------------------------
+--Kolonlara Alias Vermek
+--------------------------------------------
+
+SELECT ad, soyad,
+	maas "Maaş",    
+	(maas*5/100) vergi, 
+	semt as oturdugu_semt
+FROM personel
+
+--------------------------------------------
+--Aritmetik Operatörlerin Kullanımı
+--------------------------------------------
+
+SELECT ad, soyad, maas, 
+	(maas + maas * 8 / 100) zamli_maas 
+FROM personel
+
+--------------------------------------------
+--NULL Değeri ve Özellikleri
+--------------------------------------------
+
+SELECT ad, soyad, semt, maas, prim,    
+      (maas + prim) hesaba_yatan 
+FROM personel
+
+--------------------------------------------
+--Birleştirme Operatörü
+--------------------------------------------
+
+SELECT ad, soyad,
+	ad||' '||soyad adi_soyadi, 
+	concat(ad,soyad) adsoyad,
+	zmaas || ' TL' maasi 
+FROM personel;
+
+--------------------------------------------
+
+SELECT ad, soyad, prim, semt,   
+      'Prim: [' || prim || '] Semt: [' || semt || ']' prim_semt
+FROM personel
+
+--------------------------------------------
+--Tekrarlayan Satırlar
+--------------------------------------------
+
+SELECT DISTINCT unvan, semt 
+FROM personel
+
+--------------------------------------------
+--Tablo Yapısını Görüntüleme
+--------------------------------------------
+
+DESCRIBE personel;
+
+DESC personel;
